@@ -1,0 +1,1 @@
+./bin/Hitchcock $1
