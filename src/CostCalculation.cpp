@@ -23,7 +23,7 @@ void CostCalculation::calculate(Graph& graph){
 }
 
 void CostCalculation::dijkstra(Graph& graph, const int start){
-    dvector d(graph.size(), std::numeric_limits<double>::max());
+    dvector d(graph.size(), INF);
     ivector path(graph.size(), -1);
     d.at(start) = 0; path.at(start) = start;
     pqueue Q;

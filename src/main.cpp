@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
         const double best_result = TransportAlgorithm::calculate(G);
         std::cout << "OPTIMAL: " << std::setprecision(20) << best_result << std::endl;
         const double approx_result = SimulatedAnnealing::calculate(G);
-        std::cout << "APPROX: " << std::setprecision(20) << approx_result << std::endl;
+        std::cout << "APPROX : " << std::setprecision(20) << approx_result << std::endl;
 
     }catch(const std::exception& e){
         std::cout << e.what() << std::endl;

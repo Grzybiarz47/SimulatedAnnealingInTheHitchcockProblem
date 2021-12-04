@@ -3,7 +3,6 @@
 #define GRAPH 0
 #define SHOPS 1
 #define WAREHOUSES 2
-#define INF 1E+9
 
 //public:
 void Graph::read_from_file(){
@@ -62,26 +61,14 @@ void Graph::read_from_file(){
     if(demand != supply){ //check if problem is open
         int size = _crossroads.size();
         _crossroads.resize(size + 1);
-        //add_crossroad(0, size, INF);
-        //add_crossroad(size, 0, INF);
 
         if(supply > demand){
-            for(const auto& warehouse : _warehouses){
-                add_crossroad(warehouse.first, size, INF);
-                add_crossroad(size, warehouse.first, INF);
-            }
             add_shop(size, supply - demand);
         }
         else{
-            for(const auto& shop : _shops){
-                add_crossroad(shop.first, size, INF);
-                add_crossroad(size, shop.first, INF);
-            }
-
             add_warehouse(size, demand - supply);
         }
             
-
         additional_vertex = size;
     }
 
@@ -101,17 +88,16 @@ void Graph::write_paths_to_file(const dvector& d, const ivector& path, const int
     for(const auto& p : _shops){
         int shop = p.first;
 
-        if(additional_vertex == shop)
+        if(additional_vertex == shop || d.at(shop) == INF)
             continue;
 
-        fout << "path s-w (" <<  shop + 1 << "," << warehouse + 1 << ")\n";
         do{
             fout << shop + 1 << " ";
             shop = path.at(shop);
         } while(shop != warehouse);
         fout << warehouse + 1 << " ";
 
-        fout << d.at(p.first) << "\n";
+        fout << d.at(shop) << "\n";
     }
     fout.close();
 }
@@ -120,15 +106,14 @@ void Graph::write_solution_to_file(const std::vector<ivector>& solution) const{
     fout.open(PATHOUT, std::ios_base::app);
 
     fout << "---\n";
-    for(uint j = 0; j < _shops.size(); ++j)
-        for(uint i = 0; i < _warehouses.size(); ++i){
+    for(uint i = 0; i < _warehouses.size(); ++i)
+        for(uint j = 0; j < _shops.size(); ++j){
             int warehouse = _warehouses.at(i).first;
             int shop = _shops.at(j).first;
             
-            if(additional_vertex == warehouse || additional_vertex == shop)
+            if(additional_vertex == warehouse || additional_vertex == shop || _costs.at(i).at(j))
                 continue;
 
-            fout << "cargo s-w (" <<  _shops.at(j).first + 1 << "," << _warehouses.at(i).first + 1 << ")\n";
             fout << solution.at(i).at(j) << "\n";
         }
     fout << "---\n";

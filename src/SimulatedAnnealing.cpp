@@ -1,7 +1,7 @@
 #include "SimulatedAnnealing.hpp"
 
 #define START_TEMP 1000
-#define STEP 5
+#define STEP 10
 #define TEMP_CONST 0.001
 
 double SimulatedAnnealing::calculate(const Graph& graph){
@@ -14,7 +14,7 @@ double SimulatedAnnealing::calculate(const Graph& graph){
     std::vector<ivector> M(warehouses.size(), ivector(shops.size()));
     std::set<vertex_ivalue_pair> paths;
 
-    TransportAlgorithm::find_first_solution(graph, M);
+    TransportAlgorithm::find_first_solution(M, warehouses, shops, cost_matrix);
     SimulatedAnnealing::build_sets(M, paths);
 
     if(shops.size() > 1 && warehouses.size() > 1){

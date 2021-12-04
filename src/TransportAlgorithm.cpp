@@ -2,6 +2,9 @@
 
 #define ROW true
 #define COLUMN false
+#define TOLERANCY 1.0
+
+double approx = 0.0;
 
 typedef std::queue<vertex_ivalue_pair> queue;
 
@@ -9,13 +12,20 @@ typedef std::queue<vertex_ivalue_pair> queue;
 const double TransportAlgorithm::calculate(const Graph& graph){
     const auto& warehouses = graph.get_warehouses();
     const auto& shops = graph.get_shops();
+    const auto& cost_matrix = graph.get_costs();
 
     std::vector<ivector> M(warehouses.size(), ivector(shops.size()));
     std::set<vertex_ivalue_pair> B;
         
-    TransportAlgorithm::find_first_solution(graph, M);
+    TransportAlgorithm::find_first_solution(M, warehouses, shops, cost_matrix);
     TransportAlgorithm::find_base_set(M, B);
 
+    if(B.size() != (shops.size() + warehouses.size() - 1)){ //check if solution is degenerated
+        TransportAlgorithm::make_base_set_valid(M, warehouses, shops, cost_matrix, B);
+        if(B.size() != (shops.size() + warehouses.size() - 1)) //if base set is still too small
+            return TransportAlgorithm::evaluate_solution(M, cost_matrix);
+    }
+    
     constexpr int ITER_MAX = 100;
     for(uint iter = 0; iter < ITER_MAX; ++iter){
         std::vector<dvector> cB(warehouses.size(), dvector(shops.size(), 0.0));
@@ -26,7 +36,7 @@ const double TransportAlgorithm::calculate(const Graph& graph){
         transport_helper::print_set(B);
 #endif
 
-        TransportAlgorithm::find_zero_matrix(cB, B, graph.get_costs());
+        TransportAlgorithm::find_zero_matrix(cB, B, cost_matrix);
         vertex_ivalue_pair min_p = TransportAlgorithm::find_min(cB);
         
         if(TransportAlgorithm::is_optimal(cB, min_p))
@@ -34,8 +44,10 @@ const double TransportAlgorithm::calculate(const Graph& graph){
         else
             B.insert(min_p);
 
-        TransportAlgorithm::find_cycle(graph, B, min_p, gamma1, gamma2);
-        TransportAlgorithm::update_base_set_and_matrix(M, B, gamma1, gamma2);
+        if(TransportAlgorithm::find_cycle(graph, B, min_p, gamma1, gamma2))
+            TransportAlgorithm::update_base_set_and_matrix(M, B, gamma1, gamma2);
+        else
+            break;
     }
 
 #ifdef DEBUG
@@ -44,15 +56,11 @@ const double TransportAlgorithm::calculate(const Graph& graph){
         std::cout << "^^^ OPTIMAL SOLUTION ^^^\n";
 #endif
 
-    graph.write_solution_to_file(M);
-    return TransportAlgorithm::evaluate_solution(M, graph.get_costs());
+    return TransportAlgorithm::evaluate_solution(M, cost_matrix);
 }
 
-void TransportAlgorithm::find_first_solution(const Graph& graph, std::vector<ivector>& M){ //using minimal matrix element algorithm
-    auto warehouses = graph.get_warehouses(); //intentional copy
-    auto shops = graph.get_shops(); //intentional copy
-    const auto& cost_matrix = graph.get_costs();
-
+void TransportAlgorithm::find_first_solution(std::vector<ivector>& M, std::vector<vertex_ivalue_pair> warehouses, std::vector<vertex_ivalue_pair> shops,
+                                             const std::vector<dvector>& cost_matrix){ //using minimal matrix element algorithm
     std::vector < std::pair<double, vertex_ivalue_pair> > temp;
     for(uint i = 0; i < warehouses.size(); ++i)
         for(uint j = 0; j < shops.size(); ++j)
@@ -96,7 +104,7 @@ void TransportAlgorithm::find_base_set(const std::vector<ivector>& M, std::set<v
                 B.insert({i, j});
 }
 
-bool TransportAlgorithm::find_zero_matrix(std::vector<dvector>& cB, const std::set<vertex_ivalue_pair>& B, const std::vector<dvector>& cost_matrix){
+void TransportAlgorithm::find_zero_matrix(std::vector<dvector>& cB, const std::set<vertex_ivalue_pair>& B, const std::vector<dvector>& cost_matrix){
     dvector u(cB.size());
     dvector v(cB.at(0).size());
     bvector u_solved(u.size(), false);
@@ -104,8 +112,6 @@ bool TransportAlgorithm::find_zero_matrix(std::vector<dvector>& cB, const std::s
 
     queue Q(std::deque(B.begin(), B.end()));
 
-    vertex_ivalue_pair no_pattern(-1, -1);
-    vertex_ivalue_pair rep = no_pattern;
     u.at(0) = 0;
     u_solved.at(0) = true;
     while(!Q.empty()){
@@ -117,21 +123,15 @@ bool TransportAlgorithm::find_zero_matrix(std::vector<dvector>& cB, const std::s
         if(u_solved.at(i)){
             v.at(j) = -(cost_matrix.at(i).at(j) + u.at(i));
             v_solved.at(j) = true;
-            rep = no_pattern;
         }
         else if(v_solved.at(j)){
             u.at(i) = -(cost_matrix.at(i).at(j) + v.at(j));
             u_solved.at(i) = true;
-            rep = no_pattern;
         }
         else{
             Q.push(p);
-            if(p == rep)   
-                return false; //system of equations cannot be solved
-            else if(rep == no_pattern)
-                rep = p;
         }
-    } //can be more efficent
+    }
 
     for(uint i = 0; i < u.size(); ++i)
         for(uint j = 0; j < v.size(); ++j)
@@ -142,12 +142,10 @@ bool TransportAlgorithm::find_zero_matrix(std::vector<dvector>& cB, const std::s
     transport_helper::print_vector(v);
     transport_helper::print_matrix(cB);
 #endif
-
-    return true;
 }
 
 bool TransportAlgorithm::is_optimal(const std::vector<dvector>& cB, const vertex_ivalue_pair& p){
-    return !(cB.at(p.first).at(p.second) < 0);
+    return !(cB.at(p.first).at(p.second) + approx < 0); //check optimality with offset
 }
 
 vertex_ivalue_pair TransportAlgorithm::find_min(const std::vector<dvector>& cB){
@@ -160,7 +158,7 @@ vertex_ivalue_pair TransportAlgorithm::find_min(const std::vector<dvector>& cB){
     return p;
 }
 
-void TransportAlgorithm::find_cycle(const Graph& graph, const std::set<vertex_ivalue_pair>& B, const vertex_ivalue_pair& p,
+bool TransportAlgorithm::find_cycle(const Graph& graph, const std::set<vertex_ivalue_pair>& B, const vertex_ivalue_pair& p,
                                     std::set<vertex_ivalue_pair>& gamma1, std::set<vertex_ivalue_pair>& gamma2){
     std::vector<ivector> rows(graph.get_warehouses().size());
     std::vector<ivector> columns(graph.get_shops().size());
@@ -177,6 +175,9 @@ void TransportAlgorithm::find_cycle(const Graph& graph, const std::set<vertex_iv
     vertices.push_back(p.first);
     find_cycle(vertices, rows, columns, visited_rows, visited_columns, COLUMN, p.second, p.first);
 
+    if(vertices.size() < 4) //because of low precision cycle may be not found
+        return false; 
+
     for(uint i = 1; i < vertices.size() - 1; i += 2) //first half-cycle
         gamma1.insert({vertices.at(i + 1), vertices.at(i)});
     gamma1.insert(p);
@@ -189,6 +190,8 @@ void TransportAlgorithm::find_cycle(const Graph& graph, const std::set<vertex_iv
     transport_helper::print_set(gamma1);
     transport_helper::print_set(gamma2);
 #endif
+
+    return true;
 }
 
 void TransportAlgorithm::update_base_set_and_matrix(std::vector<ivector>& M, std::set<vertex_ivalue_pair>& B, 
@@ -214,6 +217,25 @@ void TransportAlgorithm::update_base_set_and_matrix(std::vector<ivector>& M, std
 
     B.erase(q);
 }
+
+void TransportAlgorithm::make_base_set_valid(const std::vector<ivector>& M, const std::vector<vertex_ivalue_pair>& warehouses, const std::vector<vertex_ivalue_pair>& shops,
+                                             const std::vector<dvector>& cost_matrix, std::set<vertex_ivalue_pair>& B){ //intentional copies
+    approx = TOLERANCY;
+    const double epsilon = approx;
+    std::vector<vertex_ivalue_pair> w, s;
+    std::vector<ivector> m(warehouses.size(), ivector(shops.size()));
+
+    for(const auto& warehouse : warehouses)
+        w.emplace_back(warehouse.first, warehouse.second + epsilon);
+
+    for(const auto& shop : shops)
+        s.emplace_back(shop.first, shop.second);
+    
+    s.at(0).second += warehouses.size() * epsilon;
+
+    TransportAlgorithm::find_first_solution(m, w, s, cost_matrix);
+    TransportAlgorithm::find_base_set(m, B);
+} 
 
 //private:
 bool TransportAlgorithm::find_cycle(ivector& vertices, std::vector<ivector>& rows, std::vector<ivector>& columns, 

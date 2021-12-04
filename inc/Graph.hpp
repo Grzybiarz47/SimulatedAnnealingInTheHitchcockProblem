@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <exception>
 
+#define INF 1E+9
+
 #ifdef DEBUG
 #define PATHOUT "bin/output.txt"
 #define PATHIN "example_data/example_input.txt"
