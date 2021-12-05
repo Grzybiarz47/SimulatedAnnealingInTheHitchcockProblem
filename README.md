@@ -13,8 +13,8 @@ Objectives of the project:
  Building of the project:
  - ./build.sh
  - set debug/release mode in inc/debug.hpp file
- - in debug mode ./run.sh (path to input text file - examples in example data)
- - in release mode directly use ./Hitchcock (path to input text file) from /bin folder
+ - in debug mode ./run.sh [path to input text file - examples in example data]
+ - in release mode directly use ./Hitchcock [path to input text file] from /bin folder
  - you can delete setup and binary file using ./clean.sh
  
  Input file:
