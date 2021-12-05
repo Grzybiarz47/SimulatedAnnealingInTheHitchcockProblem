@@ -87,14 +87,15 @@ void Graph::write_paths_to_file(const dvector& d, const ivector& path, const int
 
     for(const auto& p : _shops){
         int shop = p.first;
+        int vertex = p.first;
 
         if(additional_vertex == shop || d.at(shop) == INF)
             continue;
 
         do{
-            fout << shop + 1 << " ";
-            shop = path.at(shop);
-        } while(shop != warehouse);
+            fout << vertex + 1 << " ";
+            vertex = path.at(vertex);
+        } while(vertex != warehouse);
         fout << warehouse + 1 << " ";
 
         fout << d.at(shop) << "\n";
@@ -111,7 +112,7 @@ void Graph::write_solution_to_file(const std::vector<ivector>& solution) const{
             int warehouse = _warehouses.at(i).first;
             int shop = _shops.at(j).first;
             
-            if(additional_vertex == warehouse || additional_vertex == shop || _costs.at(i).at(j))
+            if(additional_vertex == warehouse || additional_vertex == shop || _costs.at(i).at(j) == INF)
                 continue;
 
             fout << solution.at(i).at(j) << "\n";
