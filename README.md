@@ -26,8 +26,12 @@ Objectives of the project:
  - list of warehouses and supply for each of them
  - empty line "---"
  
+ ![alt text](https://github.com/Grzybiarz47/SimulatedAnnealingInTheHitchcockProblem/blob/master/example_data/image_input.png)
+ 
   Output file:
   - paths from every shop to every warehouse (if exist) with cost
   - empty line "---"
   - integer denoting cargo which should be taken from coresponding shop to warehouse
   - empty line "---" 
+
+ ![alt text](https://github.com/Grzybiarz47/SimulatedAnnealingInTheHitchcockProblem/blob/master/example_data/image_output.png)
