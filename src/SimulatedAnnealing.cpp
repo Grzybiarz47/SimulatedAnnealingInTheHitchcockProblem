@@ -19,8 +19,8 @@ double SimulatedAnnealing::calculate(const Graph& graph){
 
     if(shops.size() > 1 && warehouses.size() > 1){
         uint iter_max = warehouses.size() * shops.size();
-        for(uint i = START_TEMP; i > 0; i -= STEP){
-            double T = TEMP_CONST*i*i;
+        for(uint i = 0; i <= START_TEMP; i += STEP){
+            double T = START_TEMP / (1 + TEMP_CONST*i*i);
 
             for(uint j = 0; j < iter_max; ++j){
                 const auto& f_path = SimulatedAnnealing::draw_pair(paths);

@@ -117,7 +117,6 @@ void Graph::write_solution_to_file(const std::vector<ivector>& solution) const{
 
             fout << solution.at(i).at(j) << "\n";
         }
-    fout << "---\n";
     fout.close();
 }
 

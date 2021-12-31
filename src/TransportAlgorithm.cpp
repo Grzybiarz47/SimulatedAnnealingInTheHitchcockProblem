@@ -6,7 +6,7 @@
 
 double approx = 0.0;
 
-typedef std::queue<vertex_ivalue_pair> queue;
+typedef std::queue<vertex_ivalue_pair> queue; 
 
 //public:
 const double TransportAlgorithm::calculate(const Graph& graph){
@@ -22,11 +22,13 @@ const double TransportAlgorithm::calculate(const Graph& graph){
 
     if(B.size() != (shops.size() + warehouses.size() - 1)){ //check if solution is degenerated
         TransportAlgorithm::make_base_set_valid(M, warehouses, shops, cost_matrix, B);
-        if(B.size() != (shops.size() + warehouses.size() - 1)) //if base set is still too small
+        if(B.size() != (shops.size() + warehouses.size() - 1)){ //if base set is still too small
+            graph.write_solution_to_file(M);
             return TransportAlgorithm::evaluate_solution(M, cost_matrix);
+        }
     }
     
-    constexpr int ITER_MAX = 100;
+    constexpr int ITER_MAX = 1000;
     for(uint iter = 0; iter < ITER_MAX; ++iter){
         std::vector<dvector> cB(warehouses.size(), dvector(shops.size(), 0.0));
         std::set<vertex_ivalue_pair> gamma1, gamma2;
@@ -55,7 +57,7 @@ const double TransportAlgorithm::calculate(const Graph& graph){
         transport_helper::print_matrix(M);
         std::cout << "^^^ OPTIMAL SOLUTION ^^^\n";
 #endif
-
+    graph.write_solution_to_file(M);
     return TransportAlgorithm::evaluate_solution(M, cost_matrix);
 }
 
@@ -92,7 +94,7 @@ const double TransportAlgorithm::evaluate_solution(const std::vector<ivector>& M
 
     for(uint i = 0; i < M.size(); ++i)
         for(uint j = 0; j < M.at(i).size(); ++j)
-            res += M.at(i).at(j) * cost_matrix.at(i).at(j);
+            res += (double)M.at(i).at(j) * cost_matrix.at(i).at(j);
     
     return res;
 }
@@ -145,7 +147,7 @@ void TransportAlgorithm::find_zero_matrix(std::vector<dvector>& cB, const std::s
 }
 
 bool TransportAlgorithm::is_optimal(const std::vector<dvector>& cB, const vertex_ivalue_pair& p){
-    return !(cB.at(p.first).at(p.second) + approx < 0); //check optimality with offset
+    return !(cB.at(p.first).at(p.second) + 1e-6 < 0); //check optimality with offset
 }
 
 vertex_ivalue_pair TransportAlgorithm::find_min(const std::vector<dvector>& cB){

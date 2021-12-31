@@ -16,9 +16,9 @@ int main(int argc, char *argv[])
         G.read_from_file();
         CostCalculation::calculate(G);
         const double best_result = TransportAlgorithm::calculate(G);
-        std::cout << "OPTIMAL: " << std::setprecision(20) << best_result << std::endl;
+        std::cout << "TRANSPOTATION ALGORITHM: " << std::setprecision(20) << best_result << std::endl;
         const double approx_result = SimulatedAnnealing::calculate(G);
-        std::cout << "APPROX : " << std::setprecision(20) << approx_result << std::endl;
+        std::cout << "SIMULATED ANNEALING    : " << std::setprecision(20) << approx_result << std::endl;
 
     }catch(const std::exception& e){
         std::cout << e.what() << std::endl;

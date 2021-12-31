@@ -1,2 +1,2 @@
-//#define DEBUG
-#define RELEASE
+#define DEBUG
+//#define RELEASE
