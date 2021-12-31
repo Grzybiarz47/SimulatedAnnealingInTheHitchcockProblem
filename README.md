@@ -31,7 +31,8 @@ Objectives of the project:
   Output file:
   - paths from every shop to every warehouse (if exist) with cost
   - empty line "---"
-  - integer denoting cargo which should be taken from coresponding shop to warehouse
+  - integer denoting cargo which should be taken from coresponding shop to warehouse (transportation algorithm)
   - empty line "---" 
+  - integer denoting cargo which should be taken from coresponding shop to warehouse (simulated annealing)
 
  ![alt text](https://github.com/Grzybiarz47/SimulatedAnnealingInTheHitchcockProblem/blob/master/example_data/image_output.png)
