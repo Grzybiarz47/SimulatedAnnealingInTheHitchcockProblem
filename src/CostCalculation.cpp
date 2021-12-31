@@ -4,10 +4,16 @@
 typedef std::priority_queue<CostCalculation::DijkstraPair, std::vector<CostCalculation::DijkstraPair>, CostCalculation::Comparator> pqueue;
 
 namespace dijkstra_helper{
-    inline void push(pqueue& Q, const std::vector<vertex_dvalue_pair>& connections, dvector& d, const int source, const double cost){
-        for(const auto& p : connections)
-            if(p.second + cost < d.at(p.first)) //not neccessary
-                Q.push(CostCalculation::DijkstraPair{p.first,  p.second + cost, source});
+    void push(pqueue& Q, const std::vector<vertex_dvalue_pair>& connections, dvector& d, ivector& path, const CostCalculation::DijkstraPair& parent){
+        for(const auto& p : connections){
+            int vertex = p.first;
+            double cost = p.second;
+            if(cost + parent.cost < d.at(vertex)){
+                d.at(vertex) = cost + parent.cost;
+                path.at(vertex) = parent.vertex;
+                Q.push(CostCalculation::DijkstraPair{vertex,  d.at(vertex)});
+            }
+        }
     }
 }
 
@@ -28,17 +34,13 @@ void CostCalculation::dijkstra(Graph& graph, const int start){
     d.at(start) = 0; path.at(start) = start;
     pqueue Q;
 
-    dijkstra_helper::push(Q, graph.get_vertex(start), d, start, 0);
+    dijkstra_helper::push(Q, graph.get_vertex(start), d, path, CostCalculation::DijkstraPair{start, 0});
     while(!Q.empty()){
-        const int vertex = Q.top().vertex;
-        const double cost = Q.top().cost;
-        const int pred = Q.top().pred;
+        const auto elem = Q.top();
         Q.pop();
         
-        if(cost < d.at(vertex)) {
-            d.at(vertex) = cost; //new shortest path
-            path.at(vertex) = pred; //predecessor of vertex
-            dijkstra_helper::push(Q, graph.get_vertex(vertex), d, vertex, cost);
+        if(elem.cost == d.at(elem.vertex)){
+            dijkstra_helper::push(Q, graph.get_vertex(elem.vertex), d, path, elem);
         }
     }
     graph.write_paths_to_file(d, path, start);

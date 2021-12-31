@@ -12,13 +12,12 @@ public:
     struct DijkstraPair{
         int vertex;
         double cost;
-        int pred;
     };
 
     class Comparator{
     public:
         bool operator() (DijkstraPair a, DijkstraPair b){
-            return a.cost < b.cost;
+            return a.cost > b.cost;
         }
     };
 };
