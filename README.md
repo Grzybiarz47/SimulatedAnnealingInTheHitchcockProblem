@@ -1,6 +1,6 @@
 # Simulated Annealing In The Hitchcock Problem
 
-Project was created for the needs of Engineering Work.
+Project was created for the needs of Engineering Thesis.
 Objectives of the project:
  - find shortest paths between warehouses and shops in given graph using Dijkstra Algorithm
  - solve The Hitchcock Problem using Transportation Simplex Method (optimal solution)
@@ -26,8 +26,12 @@ Objectives of the project:
  - list of warehouses and supply for each of them
  - empty line "---"
  
+ ![alt text](https://github.com/Grzybiarz47/SimulatedAnnealingInTheHitchcockProblem/blob/master/example_data/image_input.png)
+ 
   Output file:
   - paths from every shop to every warehouse (if exist) with cost
   - empty line "---"
   - integer denoting cargo which should be taken from coresponding shop to warehouse
   - empty line "---" 
+
+ ![alt text](https://github.com/Grzybiarz47/SimulatedAnnealingInTheHitchcockProblem/blob/master/example_data/image_output.png)
