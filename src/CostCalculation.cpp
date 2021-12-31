@@ -4,7 +4,7 @@
 typedef std::priority_queue<CostCalculation::DijkstraPair, std::vector<CostCalculation::DijkstraPair>, CostCalculation::Comparator> pqueue;
 
 namespace dijkstra_helper{
-    void push(pqueue& Q, const std::vector<vertex_dvalue_pair>& connections, dvector& d, ivector& path, const CostCalculation::DijkstraPair& parent){
+    inline void push(pqueue& Q, const std::vector<vertex_dvalue_pair>& connections, dvector& d, ivector& path, const CostCalculation::DijkstraPair& parent){
         for(const auto& p : connections){
             int vertex = p.first;
             double cost = p.second;
