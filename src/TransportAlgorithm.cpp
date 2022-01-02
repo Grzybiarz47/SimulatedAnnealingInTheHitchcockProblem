@@ -20,9 +20,9 @@ const double TransportAlgorithm::calculate(const Graph& graph){
     TransportAlgorithm::find_first_solution(M, warehouses, shops, cost_matrix);
     TransportAlgorithm::find_base_set(M, B);
 
-    if(B.size() != (shops.size() + warehouses.size() - 1)){ //check if solution is degenerated
+    if(B.size() < (shops.size() + warehouses.size() - 1)){ //check if solution is degenerated
         TransportAlgorithm::make_base_set_valid(M, warehouses, shops, cost_matrix, B);
-        if(B.size() != (shops.size() + warehouses.size() - 1)){ //if base set is still too small
+        if(B.size() < (shops.size() + warehouses.size() - 1)){ //if base set is still too small
             graph.write_solution_to_file(M);
             return TransportAlgorithm::evaluate_solution(M, cost_matrix);
         }
@@ -93,8 +93,11 @@ const double TransportAlgorithm::evaluate_solution(const std::vector<ivector>& M
     double res = 0;
 
     for(uint i = 0; i < M.size(); ++i)
-        for(uint j = 0; j < M.at(i).size(); ++j)
+        for(uint j = 0; j < M.at(i).size(); ++j){
+            if(cost_matrix.at(i).at(j) == INF)
+                continue;
             res += (double)M.at(i).at(j) * cost_matrix.at(i).at(j);
+        }
     
     return res;
 }

@@ -1,8 +1,8 @@
 #include "SimulatedAnnealing.hpp"
 
 #define START_TEMP 1000
-#define STEP 10
-#define TEMP_CONST 0.001
+#define STEP 25
+#define ALPHA_CONST 0.005
 
 double SimulatedAnnealing::calculate(const Graph& graph){
     const auto& warehouses = graph.get_warehouses();
@@ -20,7 +20,7 @@ double SimulatedAnnealing::calculate(const Graph& graph){
     if(shops.size() > 1 && warehouses.size() > 1){
         uint iter_max = warehouses.size() * shops.size();
         for(uint i = 0; i <= START_TEMP; i += STEP){
-            double T = START_TEMP / (1 + TEMP_CONST*i*i);
+            double T = START_TEMP / (1 + ALPHA_CONST*i);
 
             for(uint j = 0; j < iter_max; ++j){
                 const auto& f_path = SimulatedAnnealing::draw_pair(paths);

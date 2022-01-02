@@ -35,3 +35,4 @@
 .vscode
 build/
 bin/
+help_scripts/
