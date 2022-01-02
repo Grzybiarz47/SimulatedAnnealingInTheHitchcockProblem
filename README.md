@@ -5,6 +5,10 @@ Objectives of the project:
  - find shortest paths between warehouses and shops in given graph using Dijkstra Algorithm
  - solve The Hitchcock Problem using Transportation Simplex Method (optimal solution)
  - solve The Hitchcock Problem using Simulated Annealing Method (approximal solution)
+
+Application for a graphical representation of this project's results
+ - https://wizualizacja-tras.herokuapp.com/visualization/
+ - https://github.com/olgaaaglo/HitchcockProblemVisualizationApp
  
  Requirements:
  - g++ compiler (min ver. 9.3.0)
