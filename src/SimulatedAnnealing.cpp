@@ -1,8 +1,9 @@
 #include "SimulatedAnnealing.hpp"
 
-#define START_TEMP 1000
-#define STEP 25
-#define ALPHA_CONST 0.005
+#define START_TEMP 1000.0
+#define ITER_MAX 50
+#define ALPHA_CONST 0.05
+#define MIN_CHANGE 1e-3
 
 double SimulatedAnnealing::calculate(const Graph& graph){
     const auto& warehouses = graph.get_warehouses();
@@ -17,12 +18,16 @@ double SimulatedAnnealing::calculate(const Graph& graph){
     TransportAlgorithm::find_first_solution(M, warehouses, shops, cost_matrix);
     SimulatedAnnealing::build_sets(M, paths);
 
-    if(shops.size() > 1 && warehouses.size() > 1){
-        uint iter_max = warehouses.size() * shops.size();
-        for(uint i = 0; i <= START_TEMP; i += STEP){
-            double T = START_TEMP / (1 + ALPHA_CONST*i);
+    double T = START_TEMP;
+    double eval_prev = 0.0;
+    double eval = TransportAlgorithm::evaluate_solution(M, cost_matrix);
+    int count_min_change = 0;
 
-            for(uint j = 0; j < iter_max; ++j){
+    if(shops.size() > 1 && warehouses.size() > 1){
+        uint iter_per_temp = warehouses.size() * shops.size();
+
+        for(uint iter = 0; iter < ITER_MAX; ++iter){
+            for(uint j = 0; j < iter_per_temp; ++j){
                 const auto& f_path = SimulatedAnnealing::draw_pair(paths);
                 const auto& s_path = SimulatedAnnealing::draw_pair(paths);
 
@@ -47,6 +52,19 @@ double SimulatedAnnealing::calculate(const Graph& graph){
                     paths.insert({f_path.first, s_path.second});
                     paths.insert({s_path.first, f_path.second});
                 }
+            }
+            
+            if(std::abs(eval_prev - eval) < MIN_CHANGE)
+                ++count_min_change;
+            else
+                count_min_change = 0;
+        
+            if(count_min_change == 2)
+                break;
+            else{
+                eval_prev = eval;
+                eval = TransportAlgorithm::evaluate_solution(M, cost_matrix);
+                T = T / (1 + ALPHA_CONST);
             }
         }
     }
